@@ -83,7 +83,7 @@ class Motion {
     }
 };
 
-Motion *sensor = NULL;
+Motion *motion = NULL;
 
 
 //---------------------------------------------------------- Light {}
@@ -178,7 +178,7 @@ void setup() {
   // Serial.begin(9600);
 
   sound = new Sound(SOUND_PIN);
-  sensor = new Motion(SENSOR_PIN);
+  motion = new Motion(SENSOR_PIN);
 
   light = new Light(LIGHT_PIN, LIGHT_TIMEOUT, sound);
 
@@ -188,7 +188,7 @@ void setup() {
 
 void loop() {
 
-  if (sensor->is()) {
+  if (motion->is()) {
     light->on();
   }
 
