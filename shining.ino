@@ -85,13 +85,14 @@ class Light {
     Light(byte pin, unsigned long timeout, Beeper *beeper) : pin(pin), timeout(timeout), beeper(beeper) {
 
       pinMode(pin, OUTPUT);
-      digitalWrite(pin, isON);
+      update();
     }
 
     void on() {
       started = millis();
 
       if (!isON) {
+
         isON = true;
         update();
 
@@ -118,7 +119,6 @@ class Light {
     void update() {
       digitalWrite(pin, isON);
     }
-  
 };
 
 Light *light = NULL;
