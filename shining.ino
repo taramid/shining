@@ -17,7 +17,7 @@ struct Beep {
 class Sound {
 
   inline static constexpr Beep Interval[] = {
-    {2020, 80, 144},
+    {30, 100, 144},
   };
 
   inline static constexpr Beep Start[] = {
