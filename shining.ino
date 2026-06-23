@@ -15,9 +15,9 @@ class Beeper {
     word gap;
   };
 
-  inline static constexpr Beep Interval = {800, 50, 200};
-  inline static constexpr Beep Motion   = {300, 100, 0};
-  inline static constexpr Beep Stop     = {100, 300, 0};
+  inline static constexpr Beep Interval = {2020, 80, 200};
+  inline static constexpr Beep Start    = {555, 100, 0};
+  inline static constexpr Beep Stop     = {88, 400, 0};
 
   byte pin;
 
@@ -27,8 +27,8 @@ class Beeper {
       this->pin = pin;
     }
 
-    void onMotion() {
-      this->beep(Motion);
+    void onStart() {
+      this->beep(Start);
     }
 
     void interval(word n) {
@@ -95,7 +95,7 @@ class Light {
         isON = true;
         update();
 
-        beeper->onMotion();
+        beeper->onStart();
       }
     }
 
