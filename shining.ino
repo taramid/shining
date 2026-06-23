@@ -1,4 +1,4 @@
-const byte BEEPER_PIN = 3;
+const byte SOUND_PIN = 3;
 const byte SENSOR_PIN = 5;
 const byte LIGHT_PIN = 7;
 
@@ -6,51 +6,66 @@ const unsigned long LIGHT_TIMEOUT = 180000;
 const unsigned long BEEP_INTERVAL = 60000;
 
 
-//---------------------------------------------------------- Beeper {}
-class Beeper {
+//---------------------------------------------------------- Sound {}
+struct Beep {
+  word tone;
+  word duration;
+  word gap;
 
-  struct Beep {
-    word tone;
-    word duration;
-    word gap;
+  constexpr Beep(word t, word d, word g = 0) : tone(t), duration(d), gap(g) {}
+};
+class Sound {
+
+  inline static constexpr Beep Interval[] = {
+    {2020, 80, 144},
   };
 
-  inline static constexpr Beep Interval = {2020, 80, 200};
-  inline static constexpr Beep Start    = {555, 100, 0};
-  inline static constexpr Beep Stop     = {88, 400, 0};
+  inline static constexpr Beep Start[] = {
+    {244, 44},
+  };
+
+  inline static constexpr Beep Stop[] = {
+    {66, 200},
+    {44, 100},
+  };
 
   byte pin;
 
   public:
-    Beeper(byte pin) {
+    Sound(byte pin) {
       pinMode(pin, OUTPUT);
       this->pin = pin;
     }
 
     void onStart() {
-      this->beep(Start);
+      this->play(Start);
     }
 
     void interval(word n) {
       for (word i=0; i<n; ++i) {
-        this->beep(Interval);
+        this->play(Interval);
       }
     }
 
     void onStop() {
-      this->beep(Stop);
+      this->play(Stop);
     }
 
   private:
-    void beep( Beep beep) {
+    void beep(Beep beep) {
       tone(pin, beep.tone, beep.duration);
-      if (0 < beep.gap) {
-        delay(beep.gap);
+      delay(beep.duration + beep.gap);
+    }
+
+    template <size_t N>
+    void play(const Beep (&melody)[N]) {
+      for (size_t i = 0; i < N; ++i) {
+        beep(melody[i]);
       }
     }
 };
 
-Beeper *beeper = NULL;
+Sound *sound = NULL;
 
 
 //---------------------------------------------------------- Motion {}
@@ -79,10 +94,10 @@ class Light {
   unsigned long started;
   bool isON = false;
 
-  Beeper *beeper;
+  Sound *sound;
 
   public:
-    Light(byte pin, unsigned long timeout, Beeper *beeper) : pin(pin), timeout(timeout), beeper(beeper) {
+    Light(byte pin, unsigned long timeout, Sound *sound) : pin(pin), timeout(timeout), sound(sound) {
 
       pinMode(pin, OUTPUT);
       update();
@@ -96,7 +111,7 @@ class Light {
         isON = true;
         update();
 
-        beeper->onStart();
+        sound->onStart();
       }
     }
 
@@ -106,7 +121,7 @@ class Light {
         isON = false;
         update();
 
-        beeper->onStop();
+        sound->onStop();
       }
 
       return isON;
@@ -130,12 +145,12 @@ class Tracker {
   unsigned long interval;
   unsigned long started;
 
-  Beeper *beeper;
+  Sound *sound;
 
   word n;
 
   public:
-    Tracker(unsigned long interval, Beeper *beeper) : interval(interval), beeper(beeper) {}
+    Tracker(unsigned long interval, Sound *sound) : interval(interval), sound(sound) {}
     
     void go() {
       if (0 == started) {
@@ -144,7 +159,7 @@ class Tracker {
       }
 
       if (millis() - started - n * interval >= interval) {
-        beeper->interval(++n);
+        sound->interval(++n);
         // Serial.println(n);
       }
     }
@@ -162,12 +177,12 @@ void setup() {
 
   // Serial.begin(9600);
 
-  beeper = new Beeper(BEEPER_PIN);
+  sound = new Sound(SOUND_PIN);
   sensor = new Motion(SENSOR_PIN);
 
-  light = new Light(LIGHT_PIN, LIGHT_TIMEOUT, beeper);
+  light = new Light(LIGHT_PIN, LIGHT_TIMEOUT, sound);
 
-  tracker = new Tracker(BEEP_INTERVAL, beeper);
+  tracker = new Tracker(BEEP_INTERVAL, sound);
 }
 
 
